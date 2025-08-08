@@ -60,12 +60,12 @@ namespace WebApi.Controllers
                     Users = users
                 };
 
-                return OkResponse(response);
+                return Ok(response);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex.Message);
-                return InternalServerErrorResponse();
+                return InternalServerError();
             }        
         }
 
@@ -75,15 +75,15 @@ namespace WebApi.Controllers
             try
             {
                 var user = _getUserService.GetUser(userId);
-                if (user == null) return NotFoundResponse();
+                if (user == null) return NotFound();
 
                 var userResponse = new UserResponseDTO(user);
-                return OkResponse(userResponse);
+                return Ok(userResponse);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex.Message);
-                return InternalServerErrorResponse();
+                return InternalServerError();
             }
         }
 
@@ -107,12 +107,12 @@ namespace WebApi.Controllers
                     );
 
                 var userResponse = new UserResponseDTO(user);
-                return Created(userResponse, new { user.Id }, "GetById");
+                return CreatedAtRoute("GetById", new { user.Id }, userResponse);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex.Message);
-                return InternalServerErrorResponse();
+                return InternalServerError();
             }
         }
 
@@ -122,7 +122,7 @@ namespace WebApi.Controllers
             try
             {
                 var user = _getUserService.GetUser(userId);
-                if (user == null) return NotFoundResponse();
+                if (user == null) return NotFound();
 
                 _updateUserService.Update(
                     user, 
@@ -134,12 +134,12 @@ namespace WebApi.Controllers
                     );
 
                 var userResponse = new UserResponseDTO(user);
-                return OkResponse(userResponse);
+                return Ok(userResponse);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex.Message);
-                return InternalServerErrorResponse();
+                return InternalServerError();
             }
         }
 
@@ -149,15 +149,15 @@ namespace WebApi.Controllers
             try
             {
                 var user = _getUserService.GetUser(userId);
-                if (user == null) return NotFoundResponse();
+                if (user == null) return NotFound();
 
                 _deleteUserService.Delete(user);
-                return NoContentResponse();
+                return NoContent();
             }
             catch (Exception ex)
             {
                 _logger.Error(ex.Message);
-                return InternalServerErrorResponse();
+                return InternalServerError();
             }
         }
 
@@ -167,12 +167,12 @@ namespace WebApi.Controllers
             try
             {
                 _deleteUserService.DeleteAll();
-                return NoContentResponse();
+                return NoContent();
             }
             catch (Exception ex)
             {
                 _logger.Error(ex.Message);
-                return InternalServerErrorResponse();
+                return InternalServerError();
             }
         }
 
@@ -187,7 +187,7 @@ namespace WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.Error(ex.Message);
-                return InternalServerErrorResponse();
+                return InternalServerError();
             }
         }
     }
