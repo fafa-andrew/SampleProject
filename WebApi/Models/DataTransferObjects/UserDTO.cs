@@ -21,7 +21,9 @@ namespace WebApi.Models.Users
         [Required(ErrorMessage = "User type is required")]
         [EnumDataType(typeof(UserTypes), ErrorMessage = "Invalid user type.")]
         public UserTypes Type { get; set; }
+
         public decimal? AnnualSalary { get; set; }
+
         public IEnumerable<string> Tags { get; set; }
     }
 }

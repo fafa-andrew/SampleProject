@@ -7,6 +7,8 @@
 // 6. Removed the 'user' suffix from method names because its redundant. We are already in the users controller so no need
 // 7. Added try catch blocks for catching and handling execptions. We log exceptions using log4net for simplicity.
 // 8. Added the route definitions to the verb defintions for conciseness
+// 9. Provided suitable name for GET /users/{userId} endpoint
+// 10. Fixed POST endpoint by ensuring cient doesen't specify the ID of the user
 
 using System;
 using System.Linq;
@@ -60,12 +62,14 @@ namespace WebApi.Controllers
             }        
         }
 
-        [HttpGet, Route("{userId:guid}")]
+        [HttpGet, Route("{userId:guid}", Name = "GetById")]
         public IHttpActionResult Get(Guid userId)
         {
             try
             {
                 var user = _getUserService.GetUser(userId);
+                if (user == null) return NotFoundResponse();
+
                 return OkResponse(new UserData(user));
             }
             catch (Exception ex)
@@ -76,12 +80,26 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public IHttpActionResult Create(Guid userId, [FromBody] UserDTO model)
+        public IHttpActionResult Create([FromBody] UserDTO userDTO)
         {
             try
             {
-                var user = _createUserService.Create(userId, model.Name, model.Email, model.Type, model.AnnualSalary, model.Tags);
-                return Created(new UserData(user), new { user.Id }, "GetById");
+                if (userDTO == null || !ModelState.IsValid) return BadRequest(ModelState);
+
+                //In an ideal situation, We need to check if this new ID doesn't already belong to a user.
+                //It will be better if the DB generates unique keys on it's own to prevent this check but that's beyond the scope of this test
+                var userId = Guid.NewGuid();
+                var user = _createUserService.Create(
+                    userId, 
+                    userDTO.Name, 
+                    userDTO.Email, 
+                    userDTO.Type, 
+                    userDTO.AnnualSalary, 
+                    userDTO.Tags
+                    );
+
+                var userData = new UserData(user);
+                return Created(userData, new { user.Id }, "GetById");
             }
             catch (Exception ex)
             {
@@ -96,13 +114,19 @@ namespace WebApi.Controllers
             try
             {
                 var user = _getUserService.GetUser(userId);
-                if (user == null)
-                {
-                    return NotFoundResponse();
-                }
+                if (user == null) return NotFoundResponse();
 
-                _updateUserService.Update(user, model.Name, model.Email, model.Type, model.AnnualSalary, model.Tags);
-                return OkResponse(new UserData(user));
+                _updateUserService.Update(
+                    user, 
+                    model.Name,
+                    model.Email, 
+                    model.Type, 
+                    model.AnnualSalary,
+                    model.Tags
+                    );
+
+                var userData = new UserData(user);
+                return OkResponse(userData);
             }
             catch (Exception ex)
             {
