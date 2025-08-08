@@ -7,7 +7,7 @@
 // 6. Switched methods to lambda versions for simplicity
 // 7. Renamed methods for clarity
 // 8. Added helper method for delete endpoints
-// 9. Added extra helper class for internal server errors
+// 9. Added extra helper method for internal server errors
 
 using System.Net;
 using System.Web.Http;
