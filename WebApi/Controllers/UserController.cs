@@ -16,7 +16,7 @@ using System.Web.Http;
 using BusinessEntities;
 using Core.Services.Users;
 using log4net;
-using WebApi.Models.Users;
+using WebApi.Models.DataTransferObjects.Users;
 
 namespace WebApi.Controllers
 {
@@ -50,10 +50,17 @@ namespace WebApi.Controllers
             {
                 var users = _getUserService.GetUsers(type, name, email)
                                    .Skip(skip).Take(take)
-                                   .Select(q => new UserData(q))
+                                   .Select(q => new UserResponseDTO(q))
                                    .ToList();
-                
-                return OkResponse(users);
+
+                var response = new UserListResponseDTO
+                {
+                    Page = skip,
+                    PageSize = take,
+                    Users = users
+                };
+
+                return OkResponse(response);
             }
             catch (Exception ex)
             {
@@ -70,7 +77,8 @@ namespace WebApi.Controllers
                 var user = _getUserService.GetUser(userId);
                 if (user == null) return NotFoundResponse();
 
-                return OkResponse(new UserData(user));
+                var userResponse = new UserResponseDTO(user);
+                return OkResponse(userResponse);
             }
             catch (Exception ex)
             {
@@ -80,7 +88,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public IHttpActionResult Create([FromBody] UserDTO userDTO)
+        public IHttpActionResult Create([FromBody] UserRequestDTO userDTO)
         {
             try
             {
@@ -98,8 +106,8 @@ namespace WebApi.Controllers
                     userDTO.Tags
                     );
 
-                var userData = new UserData(user);
-                return Created(userData, new { user.Id }, "GetById");
+                var userResponse = new UserResponseDTO(user);
+                return Created(userResponse, new { user.Id }, "GetById");
             }
             catch (Exception ex)
             {
@@ -108,8 +116,8 @@ namespace WebApi.Controllers
             }
         }
 
-        [HttpPut, Route("{userId:guid}")]
-        public IHttpActionResult Update(Guid userId, [FromBody] UserDTO model)
+        [HttpPut, Route("{userId:guid}/update")]
+        public IHttpActionResult Update(Guid userId, [FromBody] UserRequestDTO model)
         {
             try
             {
@@ -125,8 +133,8 @@ namespace WebApi.Controllers
                     model.Tags
                     );
 
-                var userData = new UserData(user);
-                return OkResponse(userData);
+                var userResponse = new UserResponseDTO(user);
+                return OkResponse(userResponse);
             }
             catch (Exception ex)
             {

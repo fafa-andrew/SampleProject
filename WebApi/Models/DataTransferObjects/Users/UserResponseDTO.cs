@@ -1,10 +1,10 @@
 ﻿using BusinessEntities;
 
-namespace WebApi.Models.Users
+namespace WebApi.Models.DataTransferObjects.Users
 {
-    public class UserData : IdObjectData
+    public class UserResponseDTO : IdObjectData
     {
-        public UserData(User user) : base(user)
+        public UserResponseDTO(User user) : base(user)
         {
             Email = user.Email;
             Name = user.Name;
