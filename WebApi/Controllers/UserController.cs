@@ -26,7 +26,7 @@ namespace WebApi.Controllers
 
         [Route("{userId:guid}/create")]
         [HttpPost]
-        public HttpResponseMessage CreateUser(Guid userId, [FromBody] UserModel model)
+        public IHttpActionResult CreateUser(Guid userId, [FromBody] UserDTO model)
         {
             var user = _createUserService.Create(userId, model.Name, model.Email, model.Type, model.AnnualSalary, model.Tags);
             return Found(new UserData(user));
@@ -34,7 +34,7 @@ namespace WebApi.Controllers
 
         [Route("{userId:guid}/update")]
         [HttpPost]
-        public HttpResponseMessage UpdateUser(Guid userId, [FromBody] UserModel model)
+        public HttpResponseMessage UpdateUser(Guid userId, [FromBody] UserDTO model)
         {
             var user = _getUserService.GetUser(userId);
             if (user == null)
