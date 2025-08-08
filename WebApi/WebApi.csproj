@@ -244,6 +244,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\DataTransferObjects\Users\UserListRequestDTO.cs" />
     <Compile Include="Models\DataTransferObjects\Users\UserListResponseDTO.cs" />
     <Compile Include="Models\EnumData.cs" />
     <Compile Include="Models\IdObjectData.cs" />

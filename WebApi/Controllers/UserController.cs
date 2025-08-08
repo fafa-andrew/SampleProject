@@ -3,17 +3,16 @@
 // 2. I ensured that all methods return the appropriate status codes for REST compatibility
 // 3. Re-arranged methods in GET, POST, PUT, Delete order for readability
 // 4. Changed the HTTP verb for /update from POST to PUT
-// 5. Removed the route attribute for /create endpoints because the userId param is not needed
+// 5. Removed the route attribute for the /create endpoint because the userId param is not needed
 // 6. Removed the 'user' suffix from method names because its redundant. We are already in the users controller so no need
 // 7. Added try catch blocks for catching and handling execptions. We log exceptions using log4net for simplicity.
 // 8. Added the route definitions to the verb defintions for conciseness
 // 9. Provided suitable name for GET /users/{userId} endpoint
-// 10. Fixed POST endpoint by ensuring cient doesen't specify the ID of the user
+// 10. Improved readability for the GET /list endpoint by abstracting the params to a DTO
 
 using System;
 using System.Linq;
 using System.Web.Http;
-using BusinessEntities;
 using Core.Services.Users;
 using log4net;
 using WebApi.Models.DataTransferObjects.Users;
@@ -44,19 +43,21 @@ namespace WebApi.Controllers
         }
 
         [HttpGet, Route("list")]
-        public IHttpActionResult Get(int skip, int take, UserTypes? type = null, string name = null, string email = null)
+        public IHttpActionResult Get([FromUri] UserListRequestDTO query)
         {
             try
             {
-                var users = _getUserService.GetUsers(type, name, email)
-                                   .Skip(skip).Take(take)
+                if (query == null || !ModelState.IsValid) return BadRequest(ModelState);
+
+                var users = _getUserService.GetUsers(query.Type, query.Name, query.Email)
+                                   .Skip(query.Skip).Take(query.Take)
                                    .Select(q => new UserResponseDTO(q))
                                    .ToList();
 
                 var response = new UserListResponseDTO
                 {
-                    Page = skip,
-                    PageSize = take,
+                    Page = query.Skip,
+                    PageSize = query.Take,
                     Users = users
                 };
 
@@ -117,20 +118,22 @@ namespace WebApi.Controllers
         }
 
         [HttpPut, Route("{userId:guid}/update")]
-        public IHttpActionResult Update(Guid userId, [FromBody] UserRequestDTO model)
+        public IHttpActionResult Update(Guid userId, [FromBody] UserRequestDTO userDTO)
         {
             try
             {
+                if (userDTO == null || !ModelState.IsValid) return BadRequest(ModelState);
+
                 var user = _getUserService.GetUser(userId);
                 if (user == null) return NotFound();
 
                 _updateUserService.Update(
                     user, 
-                    model.Name,
-                    model.Email, 
-                    model.Type, 
-                    model.AnnualSalary,
-                    model.Tags
+                    userDTO.Name,
+                    userDTO.Email, 
+                    userDTO.Type, 
+                    userDTO.AnnualSalary,
+                    userDTO.Tags
                     );
 
                 var userResponse = new UserResponseDTO(user);
