@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// Cleanup notes:
+// 1. Renmed to UserDTO to reflect its purpose
+// 2. Added input validation with data annotations
+
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using BusinessEntities;
 
