@@ -3,9 +3,10 @@
 // 2. I ensured that all methods return the appropriate status codes for REST compatibility
 // 3. Re-arranged methods in GET, POST, PUT, Delete order for readability
 // 4. Changed the HTTP verb for /update from POST to PUT
-// 5. Removed the route attribute for /create and /update endpoints because the userId param is not needed
+// 5. Removed the route attribute for /create endpoints because the userId param is not needed
 // 6. Removed the 'user' suffix from method names because its redundant. We are already in the users controller so no need
 // 7. Added try catch blocks for catching and handling execptions. We log exceptions using log4net for simplicity.
+// 8. Added the route definitions to the verb defintions for conciseness
 
 using System;
 using System.Linq;
@@ -40,8 +41,7 @@ namespace WebApi.Controllers
             _updateUserService = updateUserService;
         }
 
-        [Route("list")]
-        [HttpGet]
+        [HttpGet, Route("list")]
         public IHttpActionResult Get(int skip, int take, UserTypes? type = null, string name = null, string email = null)
         {
             try
@@ -60,8 +60,7 @@ namespace WebApi.Controllers
             }        
         }
 
-        [Route("{userId:guid}")]
-        [HttpGet]
+        [HttpGet, Route("{userId:guid}")]
         public IHttpActionResult Get(Guid userId)
         {
             try
@@ -75,7 +74,6 @@ namespace WebApi.Controllers
                 return InternalServerErrorResponse();
             }
         }
-
 
         [HttpPost]
         public IHttpActionResult Create(Guid userId, [FromBody] UserDTO model)
@@ -92,7 +90,7 @@ namespace WebApi.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut, Route("{userId:guid}")]
         public IHttpActionResult Update(Guid userId, [FromBody] UserDTO model)
         {
             try
@@ -113,8 +111,7 @@ namespace WebApi.Controllers
             }
         }
 
-        [Route("{userId:guid}/delete")]
-        [HttpDelete]
+        [HttpDelete, Route("{userId:guid}/delete")]
         public IHttpActionResult Delete(Guid userId)
         {
             try
@@ -132,8 +129,7 @@ namespace WebApi.Controllers
             }
         }
 
-        [Route("clear")]
-        [HttpDelete]
+        [HttpDelete, Route("clear")]
         public IHttpActionResult DeleteAll()
         {
             try
@@ -148,8 +144,7 @@ namespace WebApi.Controllers
             }
         }
 
-        [Route("list/tag")]
-        [HttpGet]
+        [HttpGet, Route("list/tag")]
         public IHttpActionResult GetByTag(string tag)
         {
             try
