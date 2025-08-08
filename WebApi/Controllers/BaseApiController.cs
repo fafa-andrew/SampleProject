@@ -7,6 +7,7 @@
 // 6. Switched methods to lambda versions for simplicity
 // 7. Renamed methods for clarity
 // 8. Added helper method for delete endpoints
+// 9. Added extra helper class for internal server errors
 
 using System.Net;
 using System.Web.Http;
@@ -15,14 +16,16 @@ namespace WebApi.Controllers
 {
     public abstract class BaseApiController : ApiController
     {
-        protected IHttpActionResult CreatedAt(object body, object routeValues, string routeName)
+        protected IHttpActionResult Created(object body, object routeValues, string routeName)
         => CreatedAtRoute(routeName, routeValues, body);
 
-        protected IHttpActionResult OkRequest(object body) => Ok(body);
+        protected IHttpActionResult OkResponse(object body) => Ok(body);
 
-        protected IHttpActionResult RecordNotFound() => NotFound();
+        protected IHttpActionResult NotFoundResponse() => NotFound();
 
         protected IHttpActionResult NoContentResponse() => StatusCode(HttpStatusCode.NoContent);
+        
+        protected IHttpActionResult InternalServerErrorResponse() => StatusCode(HttpStatusCode.InternalServerError);
 
     }
 }
