@@ -12,9 +12,10 @@
 // 11. Removed redundant GetByTag method and implemented in in the GET /users/list endpoint
 // 12. Implemented async/await for all endpoints because they're IO bound
 
-// Future optimzations:
+// Future improvements:
 // 1. Use AutoMapper to map properties to the DTOs so not some much code is needed when when DB properties change
 // 2. Move controller logic into command and query classes using MediatR so the controller is thinned up some more.
+// 3. Add authorization to safeguard the endpoint
 
 //Callout information:
 //It is my understanding that the endpoints in the task folder of postman need to work as they are without me changing them.
