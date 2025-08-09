@@ -23,12 +23,14 @@ namespace Data
             InitializeAssemblyInstancesService.Initialize(container, lifestyle, assembly);
             container.RegisterSingleton(() => InitializeDocumentStore(assembly, createIndexes));
 
-            container.Register(() =>
-                               {
-                                   var session = container.GetInstance<IDocumentStore>().OpenSession();
-                                   session.Advanced.MaxNumberOfRequestsPerSession = 5000;
-                                   return session;
-                               }, lifestyle);
+            container.Register(
+                () =>
+                {
+                    var session = container.GetInstance<IDocumentStore>().OpenAsyncSession();
+                    session.Advanced.MaxNumberOfRequestsPerSession = 5000;
+                    return session;
+                },
+                lifestyle);
         }
 
         private static IDocumentStore InitializeDocumentStore(Assembly assembly, bool createIndexes)
