@@ -11,8 +11,13 @@
 // 10. Improved readability for the GET /users/list endpoint by abstracting the params to a DTO
 // 11. Removed redundant GetByTag method and implemented in in the GET /users/list endpoint
 
+// Future optimzations:
+// 1. Use AutoMapper to map properties to the DTOs so not some much code is needed when when DB properties increase
+
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Core.Services.Users;
 using log4net;
@@ -44,16 +49,16 @@ namespace WebApi.Controllers
         }
 
         [HttpGet, Route("list")]
-        public IHttpActionResult Get([FromUri] UserListRequestDTO query)
+        public async Task<IHttpActionResult> Get([FromUri] UserListRequestDTO query, CancellationToken ct)
         {
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
 
-                var usersQuery = _getUserService.GetUsers(query.Type, query.Name, query.Email);
+                var usersQuery = await _getUserService.GetUsersAsync(ct, query.Type, query.Name, query.Email);
                 if (!string.IsNullOrEmpty(query.Tag)) usersQuery = usersQuery.Where(u => u.Tags.Contains(query.Tag));
 
-                var users = _getUserService.GetUsers(query.Type, query.Name, query.Email)
+                var users = usersQuery
                    .Skip(query.Skip).Take(query.Take)
                    .Select(q => new UserResponseDTO(q))
                    .ToList();
@@ -75,11 +80,11 @@ namespace WebApi.Controllers
         }
 
         [HttpGet, Route("{userId:guid}", Name = "GetById")]
-        public IHttpActionResult Get(Guid userId)
+        public async Task<IHttpActionResult> Get(Guid userId, CancellationToken ct)
         {
             try
             {
-                var user = _getUserService.GetUser(userId);
+                var user = await _getUserService.GetUserAync(userId, ct);
                 if (user == null) return NotFound();
 
                 var userResponse = new UserResponseDTO(user);
@@ -93,7 +98,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public IHttpActionResult Create([FromBody] UserRequestDTO userDTO)
+        public async Task<IHttpActionResult> Create([FromBody] UserRequestDTO userDTO, CancellationToken ct)
         {
             try
             {
@@ -102,13 +107,14 @@ namespace WebApi.Controllers
                 //In an ideal situation, We need to check if this new ID doesn't already belong to a user.
                 //It will be better if the DB generates unique keys on it's own to prevent this check but that's beyond the scope of this test
                 var userId = Guid.NewGuid();
-                var user = _createUserService.Create(
+                var user = await _createUserService.CreateAsync(
                     userId, 
                     userDTO.Name, 
                     userDTO.Email, 
                     userDTO.Type, 
                     userDTO.AnnualSalary, 
-                    userDTO.Tags
+                    userDTO.Tags,
+                    ct
                     );
                
                 var userResponse = new UserResponseDTO(user);
@@ -122,22 +128,23 @@ namespace WebApi.Controllers
         }
 
         [HttpPut, Route("{userId:guid}/update")]
-        public IHttpActionResult Update(Guid userId, [FromBody] UserRequestDTO userDTO)
+        public async Task<IHttpActionResult> Update(Guid userId, [FromBody] UserRequestDTO userDTO, CancellationToken ct)
         {
             try
             {
                 if (userDTO == null || !ModelState.IsValid) return BadRequest(ModelState);
 
-                var user = _getUserService.GetUser(userId);
+                var user = await _getUserService.GetUserAync(userId, ct);
                 if (user == null) return NotFound();
 
-                _updateUserService.Update(
+               await _updateUserService.UpdateAsync(
                     user, 
                     userDTO.Name,
                     userDTO.Email, 
                     userDTO.Type, 
                     userDTO.AnnualSalary,
-                    userDTO.Tags
+                    userDTO.Tags,
+                    ct
                     );
 
                 var userResponse = new UserResponseDTO(user);
@@ -151,14 +158,14 @@ namespace WebApi.Controllers
         }
 
         [HttpDelete, Route("{userId:guid}/delete")]
-        public IHttpActionResult Delete(Guid userId)
+        public async Task<IHttpActionResult> Delete(Guid userId, CancellationToken ct)
         {
             try
             {
-                var user = _getUserService.GetUser(userId);
+                var user = await _getUserService.GetUserAync(userId, ct);
                 if (user == null) return NotFound();
 
-                _deleteUserService.Delete(user);
+                await _deleteUserService.DeleteAsync(user, ct);
                 return NoContent();
             }
             catch (Exception ex)
@@ -172,11 +179,11 @@ namespace WebApi.Controllers
         //Creating roles is out of scope for this test
         [Authorize(Roles = "Admin")]
         [HttpDelete, Route("clear")]
-        public IHttpActionResult DeleteAll()
+        public async Task<IHttpActionResult> DeleteAll(CancellationToken ct)
         {
             try
             {
-                _deleteUserService.DeleteAll();
+                await _deleteUserService.DeleteAllAsync(ct);
                 return NoContent();
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using BusinessEntities;
 using Common;
 using Data.Indexes;
@@ -10,16 +11,21 @@ namespace Data.Repositories
     [AutoRegister]
     public class UserRepository : Repository<User>, IUserRepository
     {
-        private readonly IDocumentSession _documentSession;
+        private readonly IAsyncDocumentSession _documentSession;
 
-        public UserRepository(IDocumentSession documentSession) : base(documentSession)
+        public UserRepository(IAsyncDocumentSession documentSession) : base(documentSession)
         {
             _documentSession = documentSession;
         }
 
-        public IEnumerable<User> Get(UserTypes? userType = null, string name = null, string email = null)
+        public async Task<IEnumerable<User>> GetAsync(
+            CancellationToken ct,
+            UserTypes? userType = null, 
+            string name = null, 
+            string email = null
+            )
         {
-            var query = _documentSession.Advanced.DocumentQuery<User, UsersListIndex>();
+            var query = _documentSession.Advanced.AsyncDocumentQuery<User, UsersListIndex>();
 
             var hasFirstParameter = false;
             if (userType != null)
@@ -49,12 +55,13 @@ namespace Data.Repositories
                 }
                 query = query.WhereEquals("Email", email);
             }
-            return query.ToList();
+            return await query.ToListAsync();
         }
 
-        public void DeleteAll()
+        public async Task DeleteAllAsync(CancellationToken ct)
         {
-            base.DeleteAll<UsersListIndex>();
+            await DeleteAllByIndexAsync<UsersListIndex>();
+            await SaveAsync(ct);
         }
     }
 }

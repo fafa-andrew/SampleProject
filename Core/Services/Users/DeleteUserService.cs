@@ -1,6 +1,8 @@
 ﻿using BusinessEntities;
 using Common;
 using Data.Repositories;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Core.Services.Users
 {
@@ -14,14 +16,15 @@ namespace Core.Services.Users
             _userRepository = userRepository;
         }
 
-        public void Delete(User user)
+        public async Task DeleteAsync(User user, CancellationToken ct)
         {
-            _userRepository.Delete(user);
+            await _userRepository.DeleteAsync(user);
+            await _userRepository.SaveAsync(ct);
         }
 
-        public void DeleteAll()
+        public async Task DeleteAllAsync(CancellationToken ct)
         {
-            _userRepository.DeleteAll();
+            await _userRepository.DeleteAllAsync(ct);
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using BusinessEntities;
 using Common;
 using Data.Repositories;
@@ -16,14 +18,19 @@ namespace Core.Services.Users
             _userRepository = userRepository;
         }
 
-        public User GetUser(Guid id)
+        public async Task<User> GetUserAync(Guid id, CancellationToken ct)
         {
-            return _userRepository.Get(id);
+            return await _userRepository.GetAsync(id, ct);
         }
 
-        public IEnumerable<User> GetUsers(UserTypes? userType = null, string name = null, string email = null)
+        public async Task<IEnumerable<User>> GetUsersAsync(
+            CancellationToken ct,
+            UserTypes? userType = null, 
+            string name = null, 
+            string email = null
+            )
         {
-            return _userRepository.Get(userType, name, email);
+            return await _userRepository.GetAsync(ct, userType, name, email);
         }
     }
 }

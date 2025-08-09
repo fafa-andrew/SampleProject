@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using BusinessEntities;
 
 namespace Core.Services.Users
 {
     public interface IGetUserService
     {
-        User GetUser(Guid id);
+        Task<User> GetUserAync(Guid id, CancellationToken ct);
 
-        IEnumerable<User> GetUsers(UserTypes? userType = null, string name = null, string email = null);
+        Task<IEnumerable<User>> GetUsersAsync(
+            CancellationToken ct,
+            UserTypes? userType = null, 
+            string name = null,
+            string email = null
+            );
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using BusinessEntities;
 using Common;
 using Raven.Abstractions.Data;
@@ -12,31 +12,36 @@ namespace Data.Repositories
     [AutoRegister]
     public class Repository<T> : IRepository<T> where T : IdObject
     {
-        private readonly IDocumentSession _documentSession;
+        private readonly IAsyncDocumentSession _documentSession;
 
-        public Repository(IDocumentSession documentSession)
+        public Repository(IAsyncDocumentSession documentSession)
         {
             _documentSession = documentSession;
         }
 
-        public void Save(T entity)
-        {
-            _documentSession.Store(entity);
-        }
+        public async Task StoreAsync(T entity, CancellationToken ct) => await _documentSession.StoreAsync(entity, ct);
 
-        public void Delete(T entity)
+        public async Task SaveAsync(CancellationToken ct) => await _documentSession.SaveChangesAsync(ct);
+
+        public async Task DeleteAsync(T entity)
         {
             _documentSession.Delete(entity);
+            await Task.CompletedTask;
         }
 
-        public T Get(Guid id)
+        public async Task<T> GetAsync(Guid id, CancellationToken ct)
         {
-            return _documentSession.Load<T>(id);
+            return await _documentSession.LoadAsync<T>(id, ct);
         }
 
-        protected void DeleteAll<TIndex>() where TIndex : AbstractIndexCreationTask<T>
+        protected async Task DeleteAllByIndexAsync<TIndex>() where TIndex : AbstractIndexCreationTask<T>
         {
-            _documentSession.Advanced.DocumentStore.DatabaseCommands.DeleteByIndex(typeof(TIndex).Name, new IndexQuery());
+            var operation = await _documentSession.Advanced.DocumentStore
+                .AsyncDatabaseCommands
+                .DeleteByIndexAsync(typeof(TIndex).Name, new IndexQuery());
+
+            //We wait to be sure the delete all operation runs to completion
+            await operation.WaitForCompletionAsync();
         }
     }
 }

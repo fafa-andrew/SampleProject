@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using BusinessEntities;
 
 namespace Data.Repositories
 {
     public interface IRepository<T> where T : IdObject
     {
-        void Save(T entity);
-        void Delete(T entity);
-        T Get(Guid id);
+        Task StoreAsync(T entity, CancellationToken ct);
+        Task SaveAsync(CancellationToken ct);
+        Task DeleteAsync(T entity);
+        Task<T> GetAsync(Guid id, CancellationToken ct);
     }
 }
