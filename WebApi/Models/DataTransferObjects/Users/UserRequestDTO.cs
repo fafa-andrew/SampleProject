@@ -29,6 +29,8 @@ namespace WebApi.Models.DataTransferObjects.Users
         [EnumDataType(typeof(UserTypes), ErrorMessage = "Invalid user type.")]
         public UserTypes Type { get; set; }
 
+        public int Age { get; set; }
+
         public decimal? AnnualSalary { get; set; }
 
         public IEnumerable<string> Tags { get; set; }

@@ -6,13 +6,23 @@
 // 5. Removed the route attribute for the 'create' endpoint because the userId param is not needed
 // 6. Removed the 'user' suffix from method names because its redundant. We are already in the users controller so no need
 // 7. Added try catch blocks for catching and handling execptions. We log exceptions using log4net for simplicity.
-// 8. Added the route definitions to the verb defintions for conciseness
+// 8. Added the route definitions to the verb defintions where possible for conciseness
 // 9. Provided suitable name for GET /users/{userId} endpoint
 // 10. Improved readability for the GET /users/list endpoint by abstracting the params to a DTO
 // 11. Removed redundant GetByTag method and implemented in in the GET /users/list endpoint
+// 12. Implemented async/await for all endpoints because they're IO bound
 
 // Future optimzations:
-// 1. Use AutoMapper to map properties to the DTOs so not some much code is needed when when DB properties increase
+// 1. Use AutoMapper to map properties to the DTOs so not some much code is needed when when DB properties change
+// 2. Move controller logic into command and query classes using MediatR so the controller is thinned up some more.
+
+//Callout information:
+//It is my understanding that the endpoints in the task folder of postman need to work as they are without me changing them.
+//However, in the case of the POST request, it's not ideal to have the client determine the ID of the record
+//being created in the dataase. However, seeing as this is a test and those are the requirements, I will leave it as is.
+//
+//Furthermore, requests that update a record completely such us the 'update' endpoint should use the PUT verb but again, the postman collection is using
+//POST so I'm leaving that as it is as well because of the tests requirements.
 
 using System;
 using System.Linq;
@@ -48,12 +58,13 @@ namespace WebApi.Controllers
             _updateUserService = updateUserService;
         }
 
+        [Route("list/tag")]
         [HttpGet, Route("list")]
         public async Task<IHttpActionResult> Get([FromUri] UserListRequestDTO query, CancellationToken ct)
         {
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (!ModelState.IsValid) return BadRequestResponse(ModelState);
 
                 var usersQuery = await _getUserService.GetUsersAsync(ct, query.Type, query.Name, query.Email);
                 if (!string.IsNullOrEmpty(query.Tag)) usersQuery = usersQuery.Where(u => u.Tags.Contains(query.Tag));
@@ -85,7 +96,7 @@ namespace WebApi.Controllers
             try
             {
                 var user = await _getUserService.GetUserAync(userId, ct);
-                if (user == null) return NotFound();
+                if (user == null) return ResourceNotFoundResponse();
 
                 var userResponse = new UserResponseDTO(user);
                 return Ok(userResponse);
@@ -97,20 +108,21 @@ namespace WebApi.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IHttpActionResult> Create([FromBody] UserRequestDTO userDTO, CancellationToken ct)
+        [HttpPost, Route("{userId:guid}/create")]
+        public async Task<IHttpActionResult> Create(Guid userId, [FromBody] UserRequestDTO userDTO, CancellationToken ct)
         {
             try
             {
-                if (userDTO == null || !ModelState.IsValid) return BadRequest(ModelState);
+                if (userDTO == null || !ModelState.IsValid) return BadRequestResponse(ModelState);
 
-                //In an ideal situation, We need to check if this new ID doesn't already belong to a user.
-                //It will be better if the DB generates unique keys on it's own to prevent this check but that's beyond the scope of this test
-                var userId = Guid.NewGuid();
+                var existingUser = await _getUserService.GetUserAync(userId, ct);
+                if (existingUser != null) return RecordExistsResponse();
+
                 var user = await _createUserService.CreateAsync(
                     userId, 
                     userDTO.Name, 
                     userDTO.Email, 
+                    userDTO.Age,
                     userDTO.Type, 
                     userDTO.AnnualSalary, 
                     userDTO.Tags,
@@ -127,20 +139,21 @@ namespace WebApi.Controllers
             }
         }
 
-        [HttpPut, Route("{userId:guid}/update")]
+        [HttpPost, Route("{userId:guid}/update")]
         public async Task<IHttpActionResult> Update(Guid userId, [FromBody] UserRequestDTO userDTO, CancellationToken ct)
         {
             try
             {
-                if (userDTO == null || !ModelState.IsValid) return BadRequest(ModelState);
+                if (userDTO == null || !ModelState.IsValid) return BadRequestResponse(ModelState);
 
                 var user = await _getUserService.GetUserAync(userId, ct);
-                if (user == null) return NotFound();
+                if (user == null) return ResourceNotFoundResponse();
 
                await _updateUserService.UpdateAsync(
                     user, 
                     userDTO.Name,
                     userDTO.Email, 
+                    userDTO.Age,
                     userDTO.Type, 
                     userDTO.AnnualSalary,
                     userDTO.Tags,
@@ -163,10 +176,10 @@ namespace WebApi.Controllers
             try
             {
                 var user = await _getUserService.GetUserAync(userId, ct);
-                if (user == null) return NotFound();
+                if (user == null) return ResourceNotFoundResponse();
 
                 await _deleteUserService.DeleteAsync(user, ct);
-                return NoContent();
+                return NoContentResponse();
             }
             catch (Exception ex)
             {
@@ -184,7 +197,7 @@ namespace WebApi.Controllers
             try
             {
                 await _deleteUserService.DeleteAllAsync(ct);
-                return NoContent();
+                return NoContentResponse();
             }
             catch (Exception ex)
             {

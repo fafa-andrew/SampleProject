@@ -12,6 +12,7 @@ namespace Core.Services.Users
             Guid id, 
             string name,
             string email,
+            int age,
             UserTypes type, 
             decimal? annualSalary, 
             IEnumerable<string> tags,

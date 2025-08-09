@@ -11,6 +11,7 @@ namespace Core.Services.Users
                     User user,
                     string name,
                     string email,
+                    int age,
                     UserTypes type,
                     decimal? annualSalary,
                     IEnumerable<string> tags,
