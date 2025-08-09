@@ -2,13 +2,14 @@
 // 1. All endpoints now return IHttpActionResult for testability purposes
 // 2. I ensured that all methods return the appropriate status codes for REST compatibility
 // 3. Re-arranged methods in GET, POST, PUT, Delete order for readability
-// 4. Changed the HTTP verb for /update from POST to PUT
-// 5. Removed the route attribute for the /create endpoint because the userId param is not needed
+// 4. Changed the HTTP verb for the 'update' endpoint from POST to PUT
+// 5. Removed the route attribute for the 'create' endpoint because the userId param is not needed
 // 6. Removed the 'user' suffix from method names because its redundant. We are already in the users controller so no need
 // 7. Added try catch blocks for catching and handling execptions. We log exceptions using log4net for simplicity.
 // 8. Added the route definitions to the verb defintions for conciseness
 // 9. Provided suitable name for GET /users/{userId} endpoint
-// 10. Improved readability for the GET /list endpoint by abstracting the params to a DTO
+// 10. Improved readability for the GET /users/list endpoint by abstracting the params to a DTO
+// 11. Removed redundant GetByTag method and implemented in in the GET /users/list endpoint
 
 using System;
 using System.Linq;
@@ -47,12 +48,15 @@ namespace WebApi.Controllers
         {
             try
             {
-                if (query == null || !ModelState.IsValid) return BadRequest(ModelState);
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var usersQuery = _getUserService.GetUsers(query.Type, query.Name, query.Email);
+                if (!string.IsNullOrEmpty(query.Tag)) usersQuery = usersQuery.Where(u => u.Tags.Contains(query.Tag));
 
                 var users = _getUserService.GetUsers(query.Type, query.Name, query.Email)
-                                   .Skip(query.Skip).Take(query.Take)
-                                   .Select(q => new UserResponseDTO(q))
-                                   .ToList();
+                   .Skip(query.Skip).Take(query.Take)
+                   .Select(q => new UserResponseDTO(q))
+                   .ToList();
 
                 var response = new UserListResponseDTO
                 {
@@ -65,7 +69,7 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
+                _logger.Error("Failed to fetch user list", ex);
                 return InternalServerError();
             }        
         }
@@ -83,7 +87,7 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
+                _logger.Error("Get user failed", ex);
                 return InternalServerError();
             }
         }
@@ -106,13 +110,13 @@ namespace WebApi.Controllers
                     userDTO.AnnualSalary, 
                     userDTO.Tags
                     );
-
+               
                 var userResponse = new UserResponseDTO(user);
-                return CreatedAtRoute("GetById", new { user.Id }, userResponse);
+                return CreatedAtRoute("GetById", new { userId = user.Id }, userResponse);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
+                _logger.Error("Create user failed", ex);
                 return InternalServerError();
             }
         }
@@ -141,7 +145,7 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
+                _logger.Error("Update user failed", ex);
                 return InternalServerError();
             }
         }
@@ -159,11 +163,14 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
+                _logger.Error("Delete user failed", ex);
                 return InternalServerError();
             }
         }
 
+        //Assumes theres an elevated role called Admin since this deletes all users.
+        //Creating roles is out of scope for this test
+        [Authorize(Roles = "Admin")]
         [HttpDelete, Route("clear")]
         public IHttpActionResult DeleteAll()
         {
@@ -174,22 +181,7 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message);
-                return InternalServerError();
-            }
-        }
-
-        [HttpGet, Route("list/tag")]
-        public IHttpActionResult GetByTag(string tag)
-        {
-            try
-            {
-                //todo: wil be implemented soon
-                throw new NotImplementedException();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.Message);
+                _logger.Error("Clear user failed", ex);
                 return InternalServerError();
             }
         }
