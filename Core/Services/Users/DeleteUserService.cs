@@ -16,15 +16,14 @@ namespace Core.Services.Users
             _userRepository = userRepository;
         }
 
-        public async Task DeleteAsync(User user, CancellationToken ct)
+        public async Task DeleteAsync(User user)
         {
             await _userRepository.DeleteAsync(user);
-            await _userRepository.SaveAsync(ct);
         }
 
-        public async Task DeleteAllAsync(CancellationToken ct)
+        public async Task DeleteAllAsync()
         {
-            await _userRepository.DeleteAllAsync(ct);
+            await _userRepository.DeleteAllAsync();
         }
     }
 }

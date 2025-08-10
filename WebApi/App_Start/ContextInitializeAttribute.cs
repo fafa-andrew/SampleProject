@@ -19,7 +19,7 @@ namespace WebApi.App_Start
                 if (method == HttpMethod.Post || method == HttpMethod.Put || method == HttpMethod.Delete)
                 {
                     var session = (IAsyncDocumentSession)container.GetService(typeof(IAsyncDocumentSession));
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
                 }
             }
         }

@@ -13,6 +13,6 @@ namespace Data.Repositories
             string name = null, 
             string email = null);
 
-        Task DeleteAllAsync(CancellationToken ct);
+        Task DeleteAllAsync();
     }
 }

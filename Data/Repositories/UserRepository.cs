@@ -58,10 +58,9 @@ namespace Data.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task DeleteAllAsync(CancellationToken ct)
+        public async Task DeleteAllAsync()
         {
             await DeleteAllByIndexAsync<UsersListIndex>();
-            await SaveAsync(ct);
         }
     }
 }

@@ -179,7 +179,7 @@ namespace WebApi.Controllers
                 var user = await _getUserService.GetUserAync(userId, ct);
                 if (user == null) return ResourceNotFoundResponse();
 
-                await _deleteUserService.DeleteAsync(user, ct);
+                await _deleteUserService.DeleteAsync(user);
                 return NoContentResponse();
             }
             catch (Exception ex)
@@ -193,11 +193,11 @@ namespace WebApi.Controllers
         //Creating roles is out of scope for this test
         [Authorize(Roles = "Admin")]
         [HttpDelete, Route("clear")]
-        public async Task<IHttpActionResult> DeleteAll(CancellationToken ct)
+        public async Task<IHttpActionResult> DeleteAll()
         {
             try
             {
-                await _deleteUserService.DeleteAllAsync(ct);
+                await _deleteUserService.DeleteAllAsync();
                 return NoContentResponse();
             }
             catch (Exception ex)

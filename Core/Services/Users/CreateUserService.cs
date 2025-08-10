@@ -38,7 +38,7 @@ namespace Core.Services.Users
             var user = _userFactory.Create(id);
             await _updateUserService.UpdateAsync(user, name, email, age, type, annualSalary, tags, ct);
             await _userRepository.StoreAsync(user, ct);
-            
+
             return user;
         }
     }

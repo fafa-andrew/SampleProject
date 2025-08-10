@@ -6,7 +6,7 @@ namespace Core.Services.Users
 {
     public interface IDeleteUserService
     {
-        Task DeleteAsync(User user, CancellationToken ct);
-        Task DeleteAllAsync(CancellationToken ct);
+        Task DeleteAsync(User user);
+        Task DeleteAllAsync();
     }
 }
