@@ -2,7 +2,7 @@
 
 namespace BusinessEntities
 {
-    public class Product : IdObject
+    public class Product : IdDateObject
     {
         private string _name;
         private string _description;
