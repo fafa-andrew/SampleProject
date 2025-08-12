@@ -30,7 +30,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Core.Services.Users;
+using Core.Services.Users.Contracts;
 using log4net;
 using WebApi.Models.DataTransferObjects.Users;
 

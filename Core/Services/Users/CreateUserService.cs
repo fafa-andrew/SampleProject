@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using BusinessEntities;
 using Common;
 using Core.Factories;
-using Data.Repositories;
+using Core.Services.Users.Contracts;
+using Data.Repositories.Contracts;
 
 namespace Core.Services.Users
 {

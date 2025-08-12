@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BusinessEntities;
 
-namespace Data.Repositories
+namespace Data.Repositories.Contracts
 {
     public interface IUserRepository : IRepository<User>
     {

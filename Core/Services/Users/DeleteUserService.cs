@@ -1,6 +1,7 @@
 ﻿using BusinessEntities;
 using Common;
-using Data.Repositories;
+using Core.Services.Users.Contracts;
+using Data.Repositories.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
 

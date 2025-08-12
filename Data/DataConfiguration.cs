@@ -1,11 +1,12 @@
-﻿using System.Reflection;
-using BusinessEntities;
+﻿using BusinessEntities;
 using Common;
+using Microsoft.EntityFrameworkCore;
 using Raven.Client;
 using Raven.Client.Document;
 using Raven.Client.Indexes;
 using Raven.Imports.Newtonsoft.Json;
 using SimpleInjector;
+using System.Reflection;
 
 namespace Data
 {
@@ -31,6 +32,15 @@ namespace Data
                     return session;
                 },
                 lifestyle);
+
+            container.Register(() =>
+            {
+                var options = new DbContextOptionsBuilder<AppDbContext>()
+                    .UseInMemoryDatabase("SampleProject")
+                    .Options;
+
+                return new AppDbContext(options);
+            }, lifestyle);
         }
 
         private static IDocumentStore InitializeDocumentStore(Assembly assembly, bool createIndexes)

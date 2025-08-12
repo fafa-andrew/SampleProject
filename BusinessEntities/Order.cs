@@ -8,8 +8,8 @@ namespace BusinessEntities
     {
         private string _customerName;
         private DateTime _orderDate;
-        private readonly List<OrderItem> _items = new List<OrderItem>();
         private OrderStatus _status;
+        private readonly List<OrderItem> _items = new List<OrderItem>();
 
         public string CustomerName => _customerName;
         public DateTime OrderDate => _orderDate;
@@ -23,5 +23,18 @@ namespace BusinessEntities
             => _orderDate = orderDate >= CreatedOn ? orderDate : throw new ArgumentOutOfRangeException(nameof(orderDate), "Order date cannot be before the created date.");
         public void SetStatus(OrderStatus status) => _status = status;
 
+        public void AddItem(OrderItem item)
+        {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item), "Order item cannot be null.");
+
+            if (_items.Any(i => i.ProductId == item.ProductId))
+                throw new InvalidOperationException($"An item with Product ID {item.ProductId} already exists in the order.");
+            
+            _items.Add(item);
+        }
+
+
+        public void ClearItems() => _items.Clear();
     }
 }

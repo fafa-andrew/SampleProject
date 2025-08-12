@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BusinessEntities;
 using Common;
+using Data.Repositories.Contracts;
 using Raven.Abstractions.Data;
 using Raven.Client;
 using Raven.Client.Indexes;

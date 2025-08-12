@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BusinessEntities;
 
-namespace Core.Services.Users
+namespace Core.Services.Users.Contracts
 {
     public interface IGetUserService
     {

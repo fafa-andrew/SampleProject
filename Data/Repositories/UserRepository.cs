@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BusinessEntities;
 using Common;
 using Data.Indexes;
+using Data.Repositories.Contracts;
 using Raven.Client;
 
 namespace Data.Repositories

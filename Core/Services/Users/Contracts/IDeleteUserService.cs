@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Core.Services.Users
+namespace Core.Services.Users.Contracts
 {
     public interface IDeleteUserService
     {
