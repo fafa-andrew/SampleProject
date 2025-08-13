@@ -84,7 +84,6 @@ namespace BusinessEntities
 
         public void SetTags(IEnumerable<string> tags)
         {
-           // if (tags is null) return;
             _tags.Initialize(tags);
         }
     }

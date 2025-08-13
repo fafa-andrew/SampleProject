@@ -11,16 +11,34 @@ namespace BusinessEntities
         private OrderStatus _status;
         private readonly List<OrderItem> _items = new List<OrderItem>();
 
-        public string CustomerName => _customerName;
-        public DateTime OrderDate => _orderDate;
-        public OrderStatus Status => _status;
+        public string CustomerName
+        {
+            get => _customerName;
+            private set => _customerName = value;
+        }
+
+        public DateTime OrderDate
+        {
+            get => _orderDate;
+            private set => _orderDate = value;
+        }
+
+        public OrderStatus Status
+        {
+            get => _status;
+            private set => _status = value;
+        }
+
         public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
+        
         public decimal TotalAmount => _items.Sum(i => i.LineTotal);
 
         public void SetCustomerName(string customerName) 
             => _customerName = customerName.Trim() ?? throw new ArgumentNullException(nameof(customerName));
+       
         public void SetOrderDate(DateTime orderDate) 
             => _orderDate = orderDate >= CreatedOn ? orderDate : throw new ArgumentOutOfRangeException(nameof(orderDate), "Order date cannot be before the created date.");
+        
         public void SetStatus(OrderStatus status) => _status = status;
 
         public void AddItem(OrderItem item)
@@ -33,7 +51,6 @@ namespace BusinessEntities
             
             _items.Add(item);
         }
-
 
         public void ClearItems() => _items.Clear();
     }

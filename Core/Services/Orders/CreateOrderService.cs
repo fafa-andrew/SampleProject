@@ -34,7 +34,7 @@ namespace Core.Services.Orders
             List<OrderItemRequest> items, 
             CancellationToken ct)
         {
-            var order = _orderFactory.Create(new Guid());
+            var order = _orderFactory.Create(Guid.NewGuid());
             order.SetCustomerName(customerName);
             order.SetOrderDate(orderDate);
             order.SetStatus(OrderStatus.New);

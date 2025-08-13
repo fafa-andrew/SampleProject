@@ -9,13 +9,31 @@ namespace BusinessEntities
         private decimal _price;
         private int _stock;
 
-        public string Name => _name;
+        public string Name
+        {
+            get => _name;
+            private set => _name = value;
+        }
 
-        public string Description => _description; 
+        public string Description
+        {
+            get => _description;
+            private set => _description = value;
+        }
 
-        public decimal Price => _price;
+        public decimal Price
+        {
+            get => _price;
+            private set => _price = value;
+        }
 
-        public int Stock => _stock;
+
+        public int Stock
+        {
+            get => _stock;
+            private set => _stock = value;
+        }
+
 
         public void SetName(string name) => _name = name.Trim() ?? throw new ArgumentNullException(nameof(name));
 

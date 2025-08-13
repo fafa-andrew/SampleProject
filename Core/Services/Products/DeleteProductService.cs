@@ -22,6 +22,7 @@ namespace Core.Services.Products
              ct.ThrowIfCancellationRequested();
 
             await _productRepository.DeleteAsync(productId);
+            await _productRepository.SaveAsync(ct);
         }
     }
 }

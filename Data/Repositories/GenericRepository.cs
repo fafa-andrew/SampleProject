@@ -25,8 +25,6 @@ namespace Data.Repositories
         {
             var entity = await _context.Set<T>().FindAsync(id);
             if (entity != null) _context.Set<T>().Remove(entity);
-
-            throw new ArgumentException($"Entity with id {id} not found.");
         }
 
         public async Task SaveAsync(CancellationToken ct) => await _context.SaveChangesAsync(ct);

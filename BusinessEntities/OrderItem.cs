@@ -8,9 +8,24 @@ namespace BusinessEntities
         private int _quantity;
         private decimal _unitPrice;
 
-        public Guid ProductId => _productId;
-        public int Quantity => _quantity;
-        public decimal UnitPrice => _unitPrice;
+        public Guid ProductId
+        {
+            get => _productId;
+            private set => _productId = value;
+        }
+
+        public int Quantity
+        {
+            get => _quantity;
+            private set => _quantity = value;
+        }
+
+        public decimal UnitPrice
+        {
+            get => _unitPrice;
+            private set => _unitPrice = value;
+        }
+
         public decimal LineTotal => UnitPrice * Quantity;
 
         public void SetProductId(Guid productId) => _productId = productId;

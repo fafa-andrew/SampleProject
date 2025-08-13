@@ -25,9 +25,7 @@ namespace Core.Services.Orders
             ct.ThrowIfCancellationRequested();
 
             var order = await _orderRepository.FindAsync(id);
-            if( order != null) return order;
-
-            throw new ArgumentException($"Order with ID {id} not found.", nameof(id));
+            return order;
         }
 
         public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken ct) 

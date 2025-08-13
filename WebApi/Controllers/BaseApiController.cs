@@ -29,9 +29,9 @@ namespace WebApi.Controllers
             => Content(HttpStatusCode.Conflict, new { error = "Resource already exists" });
 
         protected IHttpActionResult ResourceNotFoundResponse()
-            => Content(HttpStatusCode.Conflict, new { error = "Resource not found" });
+            => Content(HttpStatusCode.NotFound, new { error = "Resource not found" });
 
         protected IHttpActionResult InternalServerErrorResponse() 
-            => Content(HttpStatusCode.Conflict, new { error = "An internal error occurred. We've been notified!" });
+            => Content(HttpStatusCode.InternalServerError, new { error = "An internal error occurred. We've been notified!" });
     }
 }

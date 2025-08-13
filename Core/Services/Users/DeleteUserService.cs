@@ -2,7 +2,6 @@
 using Common;
 using Core.Services.Users.Contracts;
 using Data.Repositories.Contracts;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Core.Services.Users

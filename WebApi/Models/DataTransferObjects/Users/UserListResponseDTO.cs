@@ -2,10 +2,8 @@
 
 namespace WebApi.Models.DataTransferObjects.Users
 {
-    public class UserListResponseDTO
+    public class UserListResponseDTO : PagingDTO
     {
-        public IEnumerable<UserResponseDTO> Users { get; set; }
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; }
+        public IEnumerable<UserResponseDTO> Users { get; set; } = new List<UserResponseDTO>();
     }
 }

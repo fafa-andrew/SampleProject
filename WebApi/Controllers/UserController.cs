@@ -25,13 +25,14 @@
 //Furthermore, requests that update a record completely such us the 'update' endpoint should use the PUT verb but again, the postman collection is using
 //POST so I'm leaving that as it is as well because of the tests requirements.
 
+using Core.Services.Users.Contracts;
+using log4net;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Core.Services.Users.Contracts;
-using log4net;
+using WebApi.Models.DataTransferObjects.Products;
 using WebApi.Models.DataTransferObjects.Users;
 
 namespace WebApi.Controllers
@@ -65,20 +66,23 @@ namespace WebApi.Controllers
         {
             try
             {
+                if (query is null) query = new UserListRequestDTO();
+
                 if (!ModelState.IsValid) return BadRequestResponse(ModelState);
 
                 var usersQuery = await _getUserService.GetUsersAsync(ct, query.Type, query.Name, query.Email);
                 if (!string.IsNullOrEmpty(query.Tag)) usersQuery = usersQuery.Where(u => u.Tags.Contains(query.Tag));
 
                 var users = usersQuery
-                   .Skip(query.Skip).Take(query.Take)
+                   .Skip((query.Page-1)*query.PageSize)
+                   .Take(query.PageSize)
                    .Select(q => new UserResponseDTO(q))
                    .ToList();
 
                 var response = new UserListResponseDTO
                 {
-                    Page = query.Skip,
-                    PageSize = query.Take,
+                    Page = query.Page,
+                    PageSize = query.PageSize,
                     Users = users
                 };
 
@@ -87,11 +91,11 @@ namespace WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.Error("Failed to fetch user list", ex);
-                return InternalServerError();
+                return InternalServerErrorResponse();
             }        
         }
 
-        [HttpGet, Route("{userId:guid}", Name = "GetById")]
+        [HttpGet, Route("{userId:guid}", Name = "GetUserById")]
         public async Task<IHttpActionResult> Get(Guid userId, CancellationToken ct)
         {
             try
@@ -105,7 +109,7 @@ namespace WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.Error("Get user failed", ex);
-                return InternalServerError();
+                return InternalServerErrorResponse();
             }
         }
 
@@ -131,12 +135,12 @@ namespace WebApi.Controllers
                     );
                
                 var userResponse = new UserResponseDTO(user);
-                return CreatedAtRoute("GetById", new { userId = user.Id }, userResponse);
+                return CreatedAtRoute("GetUserById", new { userId = user.Id }, userResponse);
             }
             catch (Exception ex)
             {
                 _logger.Error("Create user failed", ex);
-                return InternalServerError();
+                return InternalServerErrorResponse();
             }
         }
 
@@ -167,7 +171,7 @@ namespace WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.Error("Update user failed", ex);
-                return InternalServerError();
+                return InternalServerErrorResponse();
             }
         }
 
@@ -185,13 +189,10 @@ namespace WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.Error("Delete user failed", ex);
-                return InternalServerError();
+                return InternalServerErrorResponse();
             }
         }
 
-        //Assumes theres an elevated role called Admin since this deletes all users.
-        //Creating roles is out of scope for this test
-        [Authorize(Roles = "Admin")]
         [HttpDelete, Route("clear")]
         public async Task<IHttpActionResult> DeleteAll()
         {
@@ -203,7 +204,7 @@ namespace WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.Error("Clear user failed", ex);
-                return InternalServerError();
+                return InternalServerErrorResponse();
             }
         }
     }

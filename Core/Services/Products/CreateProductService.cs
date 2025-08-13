@@ -19,10 +19,11 @@ namespace Core.Services.Products
             IIdObjectFactory<Product> productFactory, 
             IProductRepository productRepository)
         {
+            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
             _productFactory = productFactory ?? throw new ArgumentNullException(nameof(productFactory));
         }
 
-        public async Task CreateAsync(
+        public async Task<Product> CreateAsync(
             string name, 
             string description, 
             decimal price, 
@@ -31,7 +32,7 @@ namespace Core.Services.Products
         {
             ct.ThrowIfCancellationRequested();
 
-            var product = _productFactory.Create(new Guid());
+            var product = _productFactory.Create(Guid.NewGuid());
             
             product.SetName(name);
             product.SetDescription(description);
@@ -40,6 +41,8 @@ namespace Core.Services.Products
 
             await _productRepository.AddAsync(product);
             await _productRepository.SaveAsync(ct);
+
+            return product;
         }
     }
 }
