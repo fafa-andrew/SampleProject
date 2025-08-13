@@ -28,15 +28,10 @@ namespace Core.Services.Orders
             _orderItemFactory = orderItemFactory ?? throw new ArgumentNullException(nameof(orderItemFactory));
         }
 
-        public async Task<Order> CreateAsync(
-            string customerName, 
-            DateTime orderDate, 
-            List<OrderItemRequest> items, 
-            CancellationToken ct)
+        public async Task<Order> CreateAsync(string customerName, List<OrderLineItem> items, CancellationToken ct)
         {
             var order = _orderFactory.Create(Guid.NewGuid());
             order.SetCustomerName(customerName);
-            order.SetOrderDate(orderDate);
             order.SetStatus(OrderStatus.New);
 
             foreach (var item in items)

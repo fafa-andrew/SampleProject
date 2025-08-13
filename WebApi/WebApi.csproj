@@ -264,7 +264,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\DataTransferObjects\Orders\OrderItemDTO.cs" />
     <Compile Include="Models\DataTransferObjects\Orders\OrderListRequestDTO.cs" />
     <Compile Include="Models\DataTransferObjects\Orders\OrderListResponseDTO.cs" />
     <Compile Include="Models\DataTransferObjects\Orders\OrderRequestDTO.cs" />

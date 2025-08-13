@@ -2,9 +2,9 @@
 
 namespace Core.Services.Orders.Models
 {
-    public class OrderItemRequest
+    public class OrderLineItem
     {
-        public OrderItemRequest(Guid productId, int quantity, decimal unitPrice)
+        public OrderLineItem(Guid productId, int quantity, decimal unitPrice)
         {
             if (productId == Guid.Empty)
                 throw new ArgumentNullException(nameof(productId), "Product ID cannot be empty.");

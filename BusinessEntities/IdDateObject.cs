@@ -7,10 +7,17 @@ namespace BusinessEntities
         private DateTime _createdOn;
         private DateTime? _modifiedOn;
 
-        public DateTime CreatedOn => _createdOn;
-        public DateTime? ModifiedOn => _modifiedOn;
+        public DateTime CreatedOn
+        {
+            get => _createdOn;
+            set => _createdOn = DateTime.UtcNow;
+        }
 
-        public IdDateObject() => _createdOn = DateTime.UtcNow;
+        public DateTime? ModifiedOn
+        {
+            get => _modifiedOn;
+            set => _modifiedOn = value;
+        }
 
         public void SetModifiedDate(DateTime? modifiedOn)
         {

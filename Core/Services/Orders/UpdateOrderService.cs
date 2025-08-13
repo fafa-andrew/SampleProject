@@ -26,11 +26,26 @@ namespace Core.Services.Orders
             _orderItemFactory = orderItemFactory ?? throw new ArgumentNullException(nameof(orderItemFactory));
         }
 
+        public async Task UpdateStatusAsync(Guid orderId, OrderStatus status, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var order = 
+                await _orderRepository.FindAsync(orderId) ??
+                throw new InvalidOperationException($"Order with ID {orderId} not found.");
+
+            if (order.Status == OrderStatus.Completed) throw new InvalidOperationException("Cannot cancel a completed order.");
+            
+            order.SetStatus(status);
+            order.SetModifiedDate(DateTime.UtcNow);
+
+            await _orderRepository.SaveAsync(ct);
+        }
+
         public async Task<Order> UpdateAsync(
             Guid id, 
             string name, 
-            DateTime orderDate,
-            List<OrderItemRequest> items,
+            List<OrderLineItem> items,
             CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
@@ -40,7 +55,6 @@ namespace Core.Services.Orders
                 throw new InvalidOperationException($"Order with ID {id} not found.");
 
             order.SetCustomerName(name);
-            order.SetOrderDate(orderDate);
 
             if (items != null)
             {
@@ -51,6 +65,7 @@ namespace Core.Services.Orders
                     orderItem.SetProductId(item.ProductId);
                     orderItem.SetQuantity(item.Quantity);
                     orderItem.SetUnitPrice(item.UnitPrice);
+                    order.SetModifiedDate(DateTime.UtcNow);
 
                     order.AddItem(orderItem);
                 }

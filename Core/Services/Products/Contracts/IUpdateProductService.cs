@@ -1,5 +1,7 @@
 ﻿using BusinessEntities;
+using Core.Services.Orders.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,5 +16,7 @@ namespace Core.Services.Products.Contracts
             decimal price,
             int stock,
             CancellationToken ct);
+
+        Task AdjustStockAsync(List<OrderLineItem> items, StockAdjustment adjustment, CancellationToken ct);
     }
 }

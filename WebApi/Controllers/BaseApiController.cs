@@ -1,6 +1,7 @@
 ﻿// Cleanup notes:
 // 1. Removed all the redundant code. IHttpActionResult response messages simpler
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
@@ -21,6 +22,11 @@ namespace WebApi.Controllers
                     .Where(m => !string.IsNullOrWhiteSpace(m)));
 
             return Content(HttpStatusCode.BadRequest, new { error = errorMessage });
+        }
+
+        protected IHttpActionResult BadRequestResponse(List<string> errors)
+        {
+            return Content(HttpStatusCode.BadRequest, new { errors });
         }
 
         protected IHttpActionResult NoContentResponse() => StatusCode(HttpStatusCode.NoContent);

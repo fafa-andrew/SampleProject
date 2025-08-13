@@ -1,4 +1,9 @@
+using BusinessEntities;
+using Core.Services;
 using Core.Services.Orders.Contracts;
+using Core.Services.Orders.Models;
+using Core.Services.Products.Contracts;
+using Data.Extensions;
 using log4net;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -6,9 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Data.Extensions;
 using WebApi.Models.DataTransferObjects.Orders;
-using Core.Services.Orders.Models;
 
 namespace WebApi.Controllers
 {
@@ -20,18 +23,24 @@ namespace WebApi.Controllers
         private readonly IGetOrderService _getOrderService;
         private readonly IUpdateOrderService _updateOrderService;
         private readonly IDeleteOrderService _deleteOrderService;
+        private readonly IValidateOrderService _validateOrderService;
+        private readonly IUpdateProductService _updateProductService;
 
         public OrderController(
             ICreateOrderService createOrderService,
             IGetOrderService getOrderService,
             IUpdateOrderService updateOrderService,
-            IDeleteOrderService deleteOrderService
+            IDeleteOrderService deleteOrderService,
+            IValidateOrderService validateOrderService,
+            IUpdateProductService updateProductService
             )
         {
-            _createOrderService = createOrderService;
-            _getOrderService = getOrderService;
-            _updateOrderService = updateOrderService;
-            _deleteOrderService = deleteOrderService;
+            _createOrderService = createOrderService ?? throw new ArgumentNullException(nameof(createOrderService));
+            _getOrderService = getOrderService ?? throw new ArgumentNullException(nameof(getOrderService));
+            _updateOrderService = updateOrderService ?? throw new ArgumentNullException(nameof(updateOrderService));
+            _deleteOrderService = deleteOrderService ?? throw new ArgumentNullException(nameof(deleteOrderService));
+            _validateOrderService = validateOrderService ?? throw new ArgumentNullException(nameof(validateOrderService));
+            _updateProductService = updateProductService ?? throw new ArgumentNullException(nameof(updateProductService));
         }
 
         [HttpGet, Route("list")]
@@ -53,14 +62,13 @@ namespace WebApi.Controllers
 
                 var orders = await orderQuery
                     .Skip((query.Page - 1) * query.PageSize)
-                    .Take(query.PageSize)
-                    .Select(p => new OrderResponseDTO(p)).ToListAsync(ct);
+                    .Take(query.PageSize).ToListAsync(ct);
 
                 var response = new OrderListResponseDTO
                 {
                     Page = query.Page,
                     PageSize = query.PageSize,
-                    Orders = orders
+                    Orders = orders.Select(o => new OrderResponseDTO(o)).ToList(),
                 };
 
                 return Ok(response);
@@ -97,15 +105,12 @@ namespace WebApi.Controllers
             {
                 if (orderDto == null || !ModelState.IsValid) return BadRequestResponse(ModelState);
 
-                var items = orderDto.Items?.Select(item => new OrderItemRequest(item.ProductId, item.Quantity, item.UnitPrice)).ToList();
-                var order = await _createOrderService.CreateAsync(
-                    orderDto.CustomerName,
-                    orderDto.OrderDate,
-                    items,
-                    ct
-                    );
+                var validation = await _validateOrderService.ValidateItemsAsync(orderDto.Items, ct);
+                if (!validation.Ok) return BadRequestResponse(validation.Errors);
 
+                var order = await _createOrderService.CreateAsync(orderDto.CustomerName, validation.LineItems, ct);
                 var orderResponse = new OrderResponseDTO(order);
+
                 return CreatedAtRoute("GetOrderById", new { orderId = orderResponse.Id }, orderResponse);
             }
             catch (Exception ex)
@@ -125,16 +130,12 @@ namespace WebApi.Controllers
                 var order = await _getOrderService.GetAsync(orderId, ct);
                 if (order == null) return ResourceNotFoundResponse();
 
-                var items = orderDto.Items?.Select(item => new OrderItemRequest(item.ProductId, item.Quantity, item.UnitPrice)).ToList();
-                var updatedOrder = await _updateOrderService.UpdateAsync(
-                     orderId,
-                     orderDto.CustomerName,
-                     orderDto.OrderDate,
-                     items,
-                     ct
-                     );
+                var validation = await _validateOrderService.ValidateItemsAsync(orderDto.Items, ct);
+                if (!validation.Ok) return BadRequestResponse(validation.Errors);
 
+                var updatedOrder = await _updateOrderService.UpdateAsync(orderId, orderDto.CustomerName, validation.LineItems, ct);;
                 var orderResponse = new OrderResponseDTO(updatedOrder);
+
                 return Ok(orderResponse);
             }
             catch (Exception ex)
@@ -144,12 +145,58 @@ namespace WebApi.Controllers
             }
         }
 
+        [HttpPatch, Route("{orderId:guid}/update-status")]
+        public async Task<IHttpActionResult> UpdateStatus(Guid orderId, OrderStatus status, CancellationToken ct)
+        {
+            try
+            {
+                var order = await _getOrderService.GetAsync(orderId, ct);
+                if (order == null) return ResourceNotFoundResponse();
+                if (order.Status == OrderStatus.Completed) return BadRequest("Cannot updated a completed order");
+                if (order.Status == status) return NoContentResponse();
+
+                await _updateOrderService.UpdateStatusAsync(orderId, status, ct);
+
+                var lineItems = order.Items.Select(x => new OrderLineItem(x.ProductId, x.Quantity, x.UnitPrice));
+
+                StockAdjustment adjustment;
+                switch (status)
+                {
+                    case OrderStatus.Cancelled:
+                        adjustment = StockAdjustment.Increase;
+                        break;
+                    case OrderStatus.Completed:
+                        adjustment = StockAdjustment.Decrease;
+                        break;
+                    default:
+                        return BadRequest("Invalid order status for stock adjustment");
+                }
+
+                await _updateProductService.AdjustStockAsync(lineItems.ToList(), adjustment, ct);
+
+                return NoContentResponse();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Update order status failed", ex);
+                return InternalServerErrorResponse();
+            }
+        }
+
         [HttpDelete, Route("{orderId:guid}/delete")]
         public async Task<IHttpActionResult> Delete(Guid orderId, CancellationToken ct)
         {
             try
             {
+                var order = await _getOrderService.GetAsync(orderId, ct);
+                if (order == null) return ResourceNotFoundResponse();
+                if (order.Status == OrderStatus.Completed) return BadRequest("Cannot delete a completed order");
+
                 await _deleteOrderService.DeleteAsync(orderId, ct);
+
+                var lineItems = order.Items.Select(x => new OrderLineItem(x.ProductId, x.Quantity, x.UnitPrice));
+                await _updateProductService.AdjustStockAsync(lineItems.ToList(), StockAdjustment.Increase, ct);
+
                 return NoContentResponse();
             }
             catch (Exception ex)

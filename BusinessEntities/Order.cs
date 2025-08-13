@@ -7,7 +7,6 @@ namespace BusinessEntities
     public class Order : IdDateObject
     {
         private string _customerName;
-        private DateTime _orderDate;
         private OrderStatus _status;
         private readonly List<OrderItem> _items = new List<OrderItem>();
 
@@ -15,12 +14,6 @@ namespace BusinessEntities
         {
             get => _customerName;
             private set => _customerName = value;
-        }
-
-        public DateTime OrderDate
-        {
-            get => _orderDate;
-            private set => _orderDate = value;
         }
 
         public OrderStatus Status
@@ -35,10 +28,7 @@ namespace BusinessEntities
 
         public void SetCustomerName(string customerName) 
             => _customerName = customerName.Trim() ?? throw new ArgumentNullException(nameof(customerName));
-       
-        public void SetOrderDate(DateTime orderDate) 
-            => _orderDate = orderDate >= CreatedOn ? orderDate : throw new ArgumentOutOfRangeException(nameof(orderDate), "Order date cannot be before the created date.");
-        
+               
         public void SetStatus(OrderStatus status) => _status = status;
 
         public void AddItem(OrderItem item)

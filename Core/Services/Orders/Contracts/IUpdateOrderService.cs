@@ -12,8 +12,10 @@ namespace Core.Services.Orders.Contracts
         Task<Order> UpdateAsync(
             Guid id,
             string customerName, 
-            DateTime orderDate,
-            List<OrderItemRequest> items,
+            List<OrderLineItem> items,
             CancellationToken ct);
+
+
+        Task UpdateStatusAsync(Guid orderId, OrderStatus status, CancellationToken ct);
     }
 }

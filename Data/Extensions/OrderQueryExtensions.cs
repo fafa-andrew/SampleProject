@@ -15,8 +15,8 @@ namespace Data.Extensions
             decimal? minTotal,
             decimal? maxTotal)
         {
-            if (placedAfter.HasValue) orders = orders.Where(o => o.OrderDate >= placedAfter.Value);
-            if (placedBefore.HasValue) orders = orders.Where(o => o.OrderDate <= placedBefore.Value);
+            if (placedAfter.HasValue) orders = orders.Where(o => o.CreatedOn >= placedAfter.Value);
+            if (placedBefore.HasValue) orders = orders.Where(o => o.CreatedOn <= placedBefore.Value);
             if (minTotal.HasValue) orders = orders.Where(o => o.TotalAmount >= minTotal.Value);
             if (maxTotal.HasValue) orders = orders.Where(o => o.TotalAmount <= maxTotal.Value);
 
@@ -31,8 +31,8 @@ namespace Data.Extensions
                 case OrderSortBy.OrderDate:
                 default:
                     orders = (sortDir == SortDirection.Desc)
-                        ? orders.OrderByDescending(o => o.OrderDate)
-                        : orders.OrderBy(o => o.OrderDate);
+                        ? orders.OrderByDescending(o => o.CreatedOn)
+                        : orders.OrderBy(o => o.CreatedOn);
                     break;
             }
 

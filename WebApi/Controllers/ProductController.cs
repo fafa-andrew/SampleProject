@@ -51,14 +51,13 @@ namespace WebApi.Controllers
                 
                 var products = await productQuery
                     .Skip((query.Page - 1) * query.PageSize)
-                    .Take(query.PageSize)
-                    .Select(p => new ProductResponseDTO(p)).ToListAsync(ct);
+                    .Take(query.PageSize).ToListAsync(ct);
 
                 var response = new ProductListResponseDTO
                 {
                     Page = query.Page,
                     PageSize = query.PageSize,
-                    Products = products
+                    Products = products.Select(p => new ProductResponseDTO(p)).ToList(),
                 };
 
                 return Ok(response);
@@ -72,11 +71,11 @@ namespace WebApi.Controllers
         }
 
         [HttpGet, Route("{productId:guid}", Name = "GetProductById")]
-        public async Task<IHttpActionResult> Get(Guid id, CancellationToken ct)
+        public async Task<IHttpActionResult> Get(Guid productId, CancellationToken ct)
         {
             try
             {
-                var product = await _getProductService.GetAsync(id, ct);
+                var product = await _getProductService.GetAsync(productId, ct);
                 if (product == null) return ResourceNotFoundResponse();
 
                 var productResponse = new ProductResponseDTO(product);

@@ -27,7 +27,6 @@ namespace Data
             b.Entity<Order>().Property<Guid>("_id").HasField("_id");
             b.Entity<Order>().Property<string>("_customerName").HasField("_customerName");
             b.Entity<Order>().Property<OrderStatus>("_status").HasField("_status");
-            b.Entity<Order>().Property<DateTime>("_orderDate").HasField("_orderDate");
             b.Entity<Order>()
                 .OwnsMany(o => o.Items, oi =>
                 {
@@ -44,35 +43,6 @@ namespace Data
 
                     oi.HasKey("OrderId", "ProductId");
                 });
-        }
-
-        public override int SaveChanges()
-        {
-            UpdateTimestamps();
-            return base.SaveChanges();
-        }
-
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            UpdateTimestamps();
-            return await base.SaveChangesAsync(cancellationToken);
-        }
-
-        private void UpdateTimestamps()
-        {
-            var now = DateTime.UtcNow;
-            foreach (var e in ChangeTracker.Entries<IdDateObject>())
-            {
-                if (e.State == EntityState.Added)
-                {
-                    e.Property("_createdOn").CurrentValue = now;
-                    e.Property("_modifiedOn").CurrentValue = null;
-                }
-                else if (e.State == EntityState.Modified)
-                {
-                    e.Property("_modifiedOn").CurrentValue = now;
-                }
-            }
         }
     }
 }
