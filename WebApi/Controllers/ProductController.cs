@@ -42,7 +42,7 @@ namespace WebApi.Controllers
 
                 if (!ModelState.IsValid) return BadRequestResponse(ModelState);
 
-                var productQuery = _getProductService.GetAll().Apply(
+                var productQuery = _getProductService.GetAll().ApplyFilters(
                     query.SortBy, 
                     query.SortDir, 
                     query.InStockOnly, 
@@ -124,7 +124,7 @@ namespace WebApi.Controllers
                 var product = await _getProductService.GetAsync(productId, ct);
                 if (product == null) return ResourceNotFoundResponse();
 
-                await _updateProductService.UpdateAsync(
+                var updatedProduct = await _updateProductService.UpdateAsync(
                      productId,
                      productDto.Name,
                      productDto.Description,
@@ -133,7 +133,7 @@ namespace WebApi.Controllers
                      ct
                      );
 
-                var productResponse = new ProductResponseDTO(product);
+                var productResponse = new ProductResponseDTO(updatedProduct);
                 return Ok(productResponse);
             }
             catch (Exception ex)
@@ -153,7 +153,7 @@ namespace WebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error("Delete user failed", ex);
+                _logger.Error("Delete product failed", ex);
                 return InternalServerErrorResponse();
             }
         }

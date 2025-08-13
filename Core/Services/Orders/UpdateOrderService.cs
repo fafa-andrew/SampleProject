@@ -26,7 +26,7 @@ namespace Core.Services.Orders
             _orderItemFactory = orderItemFactory ?? throw new ArgumentNullException(nameof(orderItemFactory));
         }
 
-        public async Task UpdateAsync(
+        public async Task<Order> UpdateAsync(
             Guid id, 
             string name, 
             DateTime orderDate,
@@ -57,6 +57,8 @@ namespace Core.Services.Orders
             }
 
             await _orderRepository.SaveAsync(ct);
+
+            return order;
         }
     }
 }

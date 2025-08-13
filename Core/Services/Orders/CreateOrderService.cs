@@ -28,7 +28,7 @@ namespace Core.Services.Orders
             _orderItemFactory = orderItemFactory ?? throw new ArgumentNullException(nameof(orderItemFactory));
         }
 
-        public async Task CreateAsync(
+        public async Task<Order> CreateAsync(
             string customerName, 
             DateTime orderDate, 
             List<OrderItemRequest> items, 
@@ -51,6 +51,8 @@ namespace Core.Services.Orders
 
             await _orderRepository.AddAsync(order);
             await _orderRepository.SaveAsync(ct);
+
+            return order;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using BusinessEntities;
+using Common;
 using Core.Services.Products.Contracts;
 using Data.Repositories.Contracts;
 using System;
@@ -17,7 +18,7 @@ namespace Core.Services.Products
             _productRepository = productRepository ?? throw new System.ArgumentNullException(nameof(productRepository));
         }
 
-        public async Task UpdateAsync(
+        public async Task<Product> UpdateAsync(
             Guid id, 
             string name, 
             string description, 
@@ -37,6 +38,8 @@ namespace Core.Services.Products
             product.SetStock(stock);
 
             await _productRepository.SaveAsync(ct);
+
+            return product;
         }
     }
 }

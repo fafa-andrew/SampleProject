@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessEntities;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,7 +7,7 @@ namespace Core.Services.Products.Contracts
 {
     public interface IUpdateProductService
     {
-        Task UpdateAsync(
+        Task<Product> UpdateAsync(
             Guid id,
             string name,
             string description,

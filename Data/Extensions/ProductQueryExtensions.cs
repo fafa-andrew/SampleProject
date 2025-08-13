@@ -5,7 +5,7 @@ namespace Data.Extensions
 {
     public static class ProductQueryExtensions
     {
-        public static IQueryable<Product> Apply(
+        public static IQueryable<Product> ApplyFilters(
             this IQueryable<Product> products,
             ProductSortBy sortBy,
             SortDirection sortDir,
@@ -41,7 +41,4 @@ namespace Data.Extensions
             return products;
         }
     }
-
-    public enum ProductSortBy { Name = 1, Price = 2, Stock = 3 }
-    public enum SortDirection { Asc = 1, Desc = 2 }
 }

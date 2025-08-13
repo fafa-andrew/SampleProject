@@ -1,4 +1,4 @@
-using Data.Extensions;
+using Data;
 
 namespace WebApi.Models.DataTransferObjects.Products
 {

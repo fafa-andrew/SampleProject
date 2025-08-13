@@ -2,9 +2,8 @@
 using Common;
 using Core.Services.Orders.Contracts;
 using Data.Repositories.Contracts;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,7 +27,6 @@ namespace Core.Services.Orders
             return order;
         }
 
-        public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken ct) 
-            => await _orderRepository.GetAll.ToListAsync(ct);
+        public IQueryable<Order> GetAll() => _orderRepository.GetAll;
     }
 }

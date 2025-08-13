@@ -23,8 +23,8 @@ namespace WebApi.Models.DataTransferObjects.Products
         }
 
         [Required(ErrorMessage = "Price is required")]
-        [Range(1, int.MaxValue, ErrorMessage = "Price must be greter than 0")]
-        public int Price { get; set; }
+        [RegularExpression(@"^\d*\.?\d*$", ErrorMessage = "Please enter a correct price")]
+        public decimal Price { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "Stock must be zero or greter")]
         public int Stock { get; set; } = 0;
