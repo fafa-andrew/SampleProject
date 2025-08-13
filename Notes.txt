@@ -1,0 +1,5 @@
+Notes: 
+1. Order history tracking in the future
+2. Stock history tracking in the future
+3. Use final state machine for order status updates
+4. Unit tests for all services, repos and controllers
