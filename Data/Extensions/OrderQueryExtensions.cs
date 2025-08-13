@@ -17,8 +17,9 @@ namespace Data.Extensions
         {
             if (placedAfter.HasValue) orders = orders.Where(o => o.CreatedOn >= placedAfter.Value);
             if (placedBefore.HasValue) orders = orders.Where(o => o.CreatedOn <= placedBefore.Value);
-            if (minTotal.HasValue) orders = orders.Where(o => o.TotalAmount >= minTotal.Value);
-            if (maxTotal.HasValue) orders = orders.Where(o => o.TotalAmount <= maxTotal.Value);
+
+            if (minTotal.HasValue)orders = orders.Where(o => o.Items.Sum(i => i.UnitPrice * i.Quantity) >= minTotal.Value);
+            if (maxTotal.HasValue)orders = orders.Where(o => o.Items.Sum(i => i.UnitPrice * i.Quantity) <= maxTotal.Value);
 
             switch (sortBy)
             {

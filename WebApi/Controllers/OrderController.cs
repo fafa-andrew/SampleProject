@@ -57,8 +57,8 @@ namespace WebApi.Controllers
                     query.SortDir,
                     query.PlacedAfter,
                     query.PlacedBefore,
-                    query.MinPrice,
-                    query.MaxPrice);
+                    query.MinTotal,
+                    query.MaxTotal);
 
                 var orders = await orderQuery
                     .Skip((query.Page - 1) * query.PageSize)
@@ -81,11 +81,11 @@ namespace WebApi.Controllers
         }
 
         [HttpGet, Route("{orderId:guid}", Name = "GetOrderById")]
-        public async Task<IHttpActionResult> Get(Guid id, CancellationToken ct)
+        public async Task<IHttpActionResult> Get(Guid orderId, CancellationToken ct)
         {
             try
             {
-                var order = await _getOrderService.GetAsync(id, ct);
+                var order = await _getOrderService.GetAsync(orderId, ct);
                 if (order == null) return ResourceNotFoundResponse();
 
                 var orderResponse = new OrderResponseDTO(order);
